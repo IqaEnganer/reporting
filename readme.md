@@ -1,2 +1,2 @@
-[![Build status](https://ci.appveyor.com/api/projects/status/prd69xvq4nb1tblp?svg=true)](https://ci.appveyor.com/project/IqaEnganer/selenide)
 
+[![Build status](https://ci.appveyor.com/api/projects/status/s8iifh8n0x38uq68?svg=true)](https://ci.appveyor.com/project/IqaEnganer/pattern)
