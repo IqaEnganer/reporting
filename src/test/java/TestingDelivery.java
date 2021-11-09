@@ -1,5 +1,6 @@
 import com.codeborne.selenide.selector.WithText;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.time.Duration;
@@ -12,7 +13,9 @@ import static com.codeborne.selenide.Selenide.open;
 import static java.time.Duration.ofSeconds;
 
 public class TestingDelivery {
-    DataGenerator generator = new DataGenerator();
+    String plusDay = DataGenerator.generateDatePlusDay(4, "dd.MM.yyyy");
+    String rescheduling = DataGenerator.generateDatePlusDay(7, "dd.MM.yyyy");
+    String minusDay = DataGenerator.generateDateMinusDay(1, "dd.MM.yyyy");
 
 
     @BeforeEach
@@ -22,49 +25,53 @@ public class TestingDelivery {
 
     }
 
-    // Проверка успешной назначенной встречи
+
     @Test
+    @DisplayName("Checking a successful appointment")
     public void shouldScheduleMeetingOnSpecifiedDate() {
-        $("[data-test-id='name'] .input__control").setValue(generator.fullNameRu);
+        $("[data-test-id='name'] .input__control").setValue(DataGenerator.generateFullName("ru"));
         $("[data-test-id='date'] .input__control").doubleClick().sendKeys("BACKSPACE");
-        $("[data-test-id='date'] .input__control").setValue(generator.plusDay);
-        $("[data-test-id='city'] .input__control").setValue(generator.city);
-        $("[data-test-id='phone'] .input__control").setValue(generator.phoneNumber);
+        $("[data-test-id='date'] .input__control").setValue(plusDay);
+        $("[data-test-id='city'] .input__control").setValue(DataGenerator.generatorCity());
+        $("[data-test-id='phone'] .input__control").setValue(DataGenerator.generatorPhoneNumber("ru"));
         $("[data-test-id='agreement'] .checkbox__box").click();
         $("[class='button__content'] .button__text").click();
         $("[data-test-id='success-notification']").shouldBe(visible, Duration.ofSeconds(11));
-        $("[data-test-id='success-notification']").shouldBe(text("Встреча успешно запланирована на " + generator.plusDay));
+        $("[data-test-id='success-notification']").shouldBe(text("Встреча успешно запланирована на " + plusDay));
     }
 
     // Проверка перепланирования даты
     @Test
+    @DisplayName("Checking rescheduling dates")
     public void shouldRescheduleMeetingOnSpecifiedDate() {
-        $("[data-test-id='name'] .input__control").setValue(generator.fullNameRu);
+        $("[data-test-id='name'] .input__control").setValue(DataGenerator.generateFullName("ru"));
         $("[data-test-id='date'] .input__control").doubleClick().sendKeys("BACKSPACE");
-        $("[data-test-id='date'] .input__control").setValue(generator.plusDay);
-        $("[data-test-id='city'] .input__control").setValue(generator.city);
-        $("[data-test-id='phone'] .input__control").setValue(generator.phoneNumber);
+        $("[data-test-id='date'] .input__control").setValue(plusDay);
+        $("[data-test-id='city'] .input__control").setValue(DataGenerator.generatorCity());
+        $("[data-test-id='phone'] .input__control").setValue(DataGenerator.generatorPhoneNumber("ru"));
         $("[data-test-id='agreement'] .checkbox__box").click();
         $("[class='button__content'] .button__text").click();
+        $("[data-test-id='success-notification']").shouldBe(text("Встреча успешно запланирована на " + plusDay));
         // Перепланирование даты
         $("[data-test-id='date'] .input__control").doubleClick().sendKeys("BACKSPACE");
-        $("[data-test-id='date'] .input__control").setValue(generator.rescheduleDate);
+        $("[data-test-id='date'] .input__control").setValue(rescheduling);
         $("[class='button__content'] .button__text").click();
         $(new WithText("У вас уже запланирована встреча на другую дату. Перепланировать?")).shouldBe(visible);
         $("[class='button button_view_extra button_size_s button_theme_alfa-on-white'] .button__text").click();
-        $("[data-test-id='success-notification'] .notification__content").shouldBe(text("Встреча успешно запланирована на " + generator.rescheduleDate));
+        $("[data-test-id='success-notification'] .notification__content").shouldBe(text("Встреча успешно запланирована на " + rescheduling));
 
 
     }
 
-    // Не валидный город
+
     @Test
+    @DisplayName("Checking with an invalid city")
     void shouldMessageAboutInvalidDataWillBeDisplayedInCityField() {
-        $("[data-test-id=city] .input__control").setValue("Сочи");
+        $("[data-test-id=city] .input__control").setValue(DataGenerator.generatorCityNotValid());
         $("[data-test-id='date'] .input__control").doubleClick();
         $("[data-test-id='date'] .input__control").sendKeys("BACKSPACE");
-        $("[data-test-id='date'] .input__control").setValue(generator.plusDay);
-        $("[data-test-id='name'] .input__control").setValue(generator.fullNameRu);
+        $("[data-test-id='date'] .input__control").setValue(plusDay);
+        $("[data-test-id='name'] .input__control").setValue(DataGenerator.generateFullName("ru"));
         $("[data-test-id='phone'] .input__control").setValue("+79287775566");
         $("[data-test-id='agreement'] .checkbox__box").click();
         $("[class='button button_view_extra button_size_m button_theme_alfa-on-white']").click();
@@ -73,14 +80,14 @@ public class TestingDelivery {
 
     }
 
-    // Не валидное значение поля (ФИО)
     @Test
+    @DisplayName("Checking with a valid value in the field (full name)")
     void shouldMessageAboutInvalidDataWillBeDisplayedInNameField() {
-        $("[data-test-id=city] .input__control").setValue("Волгоград");
+        $("[data-test-id=city] .input__control").setValue(DataGenerator.generatorCity());
         $("[data-test-id='date'] .input__control").doubleClick();
         $("[data-test-id='date'] .input__control").sendKeys("BACKSPACE");
-        $("[data-test-id='date'] .input__control").setValue(generator.plusDay);
-        $("[class='input__control'][name='name']").setValue("Ivan Ivanov");
+        $("[data-test-id='date'] .input__control").setValue(plusDay);
+        $("[class='input__control'][name='name']").setValue(DataGenerator.generatorNameNotValid());
         $("[data-test-id='phone'] .input__control").setValue("+79287775566");
         $("[data-test-id='agreement'] .checkbox__box").click();
         $("[class='button button_view_extra button_size_m button_theme_alfa-on-white']").click();
@@ -88,73 +95,78 @@ public class TestingDelivery {
 
     }
 
-    // Не валидное значение в поле (Номер телефона)
+
     @Test
+    @DisplayName("Checking with an invalid value in the field (Phone number)")
     void shouldMessageAboutInvalidDataWillBeDisplayedInPhoneNumberField0() {
-        $("[data-test-id=city] .input__control").setValue(generator.city);
+        $("[data-test-id=city] .input__control").setValue(DataGenerator.generatorCity());
         $("[data-test-id='date'] .input__control").doubleClick();
         $("[data-test-id='date'] .input__control").sendKeys("BACKSPACE");
-        $("[data-test-id='date'] .input__control").setValue(generator.plusDay);
-        $("[class='input__control'][name='name']").setValue(generator.fullNameRu);
-        $("[data-test-id='phone'] .input__control").setValue(generator.notValidatePhoneNumb);
+        $("[data-test-id='date'] .input__control").setValue(plusDay);
+        $("[class='input__control'][name='name']").setValue(DataGenerator.generateFullName("ru"));
+        $("[data-test-id='phone'] .input__control").setValue(DataGenerator.generatorNumberNotValid());
         $("[data-test-id='agreement'] .checkbox__box").click();
         $("[class='button button_view_extra button_size_m button_theme_alfa-on-white']").click();
         $(withText("Телефон указан неверно. Должно быть 11 цифр, например, +79012345678.")).shouldBe(visible, ofSeconds(2));
     }
 
-    // Пустое поле (Номер телефона)
+
     @Test
+    @DisplayName("Test with an empty field (Phone number)")
     void shouldMessageAboutInvalidDataWillBeDisplayedInPhoneNumberField1() {
-        $("[data-test-id=city] .input__control").setValue(generator.city);
+        $("[data-test-id=city] .input__control").setValue(DataGenerator.generatorCity());
         $("[data-test-id='date'] .input__control").doubleClick();
         $("[data-test-id='date'] .input__control").sendKeys("BACKSPACE");
-        $("[data-test-id='date'] .input__control").setValue(generator.plusDay);
-        $("[class='input__control'][name='name']").setValue(generator.fullNameRu);
+        $("[data-test-id='date'] .input__control").setValue(plusDay);
+        $("[class='input__control'][name='name']").setValue(DataGenerator.generateFullName("ru"));
         $("[data-test-id='agreement'] .checkbox__box").click();
         $("[class='button button_view_extra button_size_m button_theme_alfa-on-white']").click();
         $(withText("Поле обязательно для заполнения")).shouldBe(visible, ofSeconds(2));
     }
 
-    // Поле дата с пустым значением
+
     @Test
+    @DisplayName("Test with an empty value in the field (Date)")
     void shouldMessageAboutInvalidDataWillBeDisplayedInDateField0() {
-        $("[data-test-id=city] .input__control").setValue(generator.city);
+        $("[data-test-id=city] .input__control").setValue(DataGenerator.generatorCity());
         $("[data-test-id='date'] .input__control").doubleClick();
         $("[data-test-id='date'] .input__control").sendKeys("BACKSPACE");
-        $("[class='input__control'][name='name']").setValue(generator.fullNameRu);
-        $("[data-test-id='phone'] .input__control").setValue(generator.phoneNumber);
+        $("[class='input__control'][name='name']").setValue(DataGenerator.generateFullName("ru"));
+        $("[data-test-id='phone'] .input__control").setValue(DataGenerator.generatorPhoneNumber("ru"));
         $("[data-test-id='agreement'] .checkbox__box").click();
         $("[class='button button_view_extra button_size_m button_theme_alfa-on-white']").click();
         $(withText("Неверно введена дата")).shouldBe(appear, ofSeconds(3));
     }
 
-    // Не валидные значения в поле (Дата)
+
     @Test
+    @DisplayName("Test with an invalid value in the field (Date)")
     void shouldMessageAboutInvalidDataWillBeDisplayedInDateField1() {
-        $("[data-test-id=city] .input__control").setValue(generator.city);
+        $("[data-test-id=city] .input__control").setValue(DataGenerator.generatorCity());
         $("[data-test-id='date'] .input__control").doubleClick();
         $("[data-test-id='date'] .input__control").sendKeys("BACKSPACE");
-        $("[data-test-id='date'] .input__control").setValue(generator.minusDay);
-        $("[class='input__control'][name='name']").setValue(generator.fullNameRu);
+        $("[data-test-id='date'] .input__control").setValue(minusDay);
+        $("[class='input__control'][name='name']").setValue(DataGenerator.generateFullName("ru"));
         $("[data-test-id='agreement'] .checkbox__box").click();
         $("[class='button button_view_extra button_size_m button_theme_alfa-on-white']").click();
         $(withText("Заказ на выбранную дату невозможен")).shouldBe(appear, ofSeconds(3));
     }
 
-    // Проверка флажка
+
     @Test
+    @DisplayName("Test without confirmation of the data processing agreement (Check the box)")
     void shouldShowTheRequiredItemMessageAsAConsentFlag() {
-        $("[data-test-id='name'] .input__control").setValue(generator.fullNameRu);
+        $("[class='input__control'][name='name']").setValue(DataGenerator.generateFullName("ru"));
         $("[data-test-id='date'] .input__control").doubleClick().sendKeys("BACKSPACE");
-        $("[data-test-id='date'] .input__control").setValue(generator.plusDay);
-        $("[data-test-id='city'] .input__control").setValue(generator.city);
-        $("[data-test-id='phone'] .input__control").setValue(generator.phoneNumber);
+        $("[data-test-id='date'] .input__control").setValue(plusDay);
+        $("[data-test-id='city'] .input__control").setValue(DataGenerator.generatorCity());
+        $("[data-test-id='phone'] .input__control").setValue(DataGenerator.generatorPhoneNumber("ru"));
         $("[class='button button_view_extra button_size_m button_theme_alfa-on-white']").click();
         $(".input_invalid[data-test-id='agreement']").shouldBe(visible);
     }
 
-    // Проверка выпадающего списка городов
     @Test
+    @DisplayName("A test to check the drop-down list of cities")
     void showDropDownListAndSelectionOption() {
         // Ввел 2 буквы в поле город
         $("[data-test-id=city] .input__control").setValue("Мо");
@@ -162,65 +174,12 @@ public class TestingDelivery {
         $(withText("Москва")).click();
         $("[data-test-id='date'] .input__control").doubleClick();
         $("[data-test-id='date'] .input__control").sendKeys("BACKSPACE");
-        $("[data-test-id='date'] .input__control").setValue(generator.plusDay);
-        $("[data-test-id='name'] .input__control").setValue(generator.fullNameRu);
-        $("[data-test-id='phone'] .input__control").setValue(generator.phoneNumber);
+        $("[data-test-id='date'] .input__control").setValue(plusDay);
+        $("[data-test-id='name'] .input__control").setValue(DataGenerator.generateFullName("ru"));
+        $("[data-test-id='phone'] .input__control").setValue(DataGenerator.generatorPhoneNumber("ru"));
         $("[data-test-id='agreement'] .checkbox__box").click();
         $("[class='button button_view_extra button_size_m button_theme_alfa-on-white']").click();
         $(withText("Успешно!")).shouldBe(visible, ofSeconds(11));
-        $("[data-test-id='success-notification'] .notification__content").shouldHave(text("Встреча успешно запланирована на " + generator.plusDay));
+        $("[data-test-id='success-notification'] .notification__content").shouldHave(text("Встреча успешно запланирована на " + plusDay));
     }
-
-    // Проверка списка даты
-    // Проверка кнопок переключения месяца и года
-    // Проверка выбора дня
-    @Test
-    void shouldShowDropDownListDatesAndTheOptionSelect0() {
-        $("[data-test-id='name'] .input__control").setValue(generator.fullNameRu);
-        $("[data-test-id='phone'] .input__control").setValue(generator.phoneNumber);
-        $("[data-test-id=city] .input__control").setValue(generator.city);
-        // Чтобы выбор даты происходил от текущей
-        $("[data-test-id='date'] .input__control").doubleClick();
-        $("[data-test-id='date'] .input__control").sendKeys("BACKSPACE");
-        $("[type][placeholder][pattern]").setValue(generator.plusDay);
-        // Клик по таблице для выбора даты встречи
-        $("span.input__box  button").click();
-        // Проверка, что окно стало видимым
-        $("[class='calendar calendar_theme_alfa-on-white']").shouldBe(visible);
-        // Клик по кнопке переключения месяца вперед
-        $("[class='calendar__arrow calendar__arrow_direction_right']").click();
-        // Клик по кнопке переключения месяца назад
-        $("[class='calendar__arrow calendar__arrow_direction_left']").click();
-        // Клик по кнопке переключения года вперед
-        $("[class='calendar__arrow calendar__arrow_direction_right calendar__arrow_double']").click();
-        // Клик по кнопке переключения года назад
-        $("[class='calendar__arrow calendar__arrow_direction_left calendar__arrow_double']").click();
-        // клик по дню в календаре
-        $("[class='calendar__arrow calendar__arrow_direction_right']").click();
-        $(withText("27")).click();
-        $("[data-test-id='agreement']").click();
-        $("[class='button__text']").click();
-        $(withText("Успешно!")).shouldBe(visible, ofSeconds(11));
-        $("[class='notification__content']").shouldHave(text("Встреча успешно запланирована на "));
-
-    }
-
-
-    // Выбор даты на неделю вперед
-    @Test
-    void shouldGetOutDateWeekInAdvance() {
-        $("[data-test-id=city] .input__control").setValue(generator.city);
-        $("[data-test-id='date'] .input__control").doubleClick();
-        $("[data-test-id='date'] .input__control").sendKeys("BACKSPACE");
-        $("[data-test-id='date'] .input__control").setValue(generator.rescheduleDate);
-        $("[data-test-id='name'] .input__control").setValue(generator.fullNameRu);
-        $("[data-test-id='phone'] .input__control").setValue(generator.phoneNumber);
-        $("[data-test-id='agreement'] .checkbox__box").click();
-        $("[class='button button_view_extra button_size_m button_theme_alfa-on-white']").click();
-        $(withText("Успешно!")).shouldBe(visible, ofSeconds(11));
-        $("[class='notification__content']").shouldHave(text("Встреча успешно запланирована на " + generator.rescheduleDate));
-
-
-    }
-
 }
