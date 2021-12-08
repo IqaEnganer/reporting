@@ -1,4 +1,8 @@
 import com.codeborne.selenide.Selectors;
+import com.codeborne.selenide.logevents.SelenideLogger;
+import io.qameta.allure.Allure;
+import io.qameta.allure.selenide.AllureSelenide;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -20,9 +24,14 @@ public class TestingDelivery {
 
     @BeforeEach
     void SetUpAll() {
-        open("http://localhost:9999/");
         headless = true;
+        SelenideLogger.addListener("allure", new AllureSelenide());
+        open("http://localhost:9999/");
+    }
 
+    @AfterAll
+    static void tearDownAll() {
+        SelenideLogger.removeListener("allure");
     }
 
 
