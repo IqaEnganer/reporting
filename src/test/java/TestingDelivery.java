@@ -1,4 +1,4 @@
-import com.codeborne.selenide.selector.WithText;
+import com.codeborne.selenide.Selectors;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -56,7 +56,7 @@ public class TestingDelivery {
         $("[data-test-id='date'] .input__control").doubleClick().sendKeys("BACKSPACE");
         $("[data-test-id='date'] .input__control").setValue(rescheduling);
         $("[class='button__content'] .button__text").click();
-        $(new WithText("У вас уже запланирована встреча на другую дату. Перепланировать?")).shouldBe(visible);
+        $(new Selectors.WithText("У вас уже запланирована встреча на другую дату. Перепланировать?")).shouldBe(visible);
         $("[class='button button_view_extra button_size_s button_theme_alfa-on-white'] .button__text").click();
         $("[data-test-id='success-notification'] .notification__content").shouldBe(text("Встреча успешно запланирована на " + rescheduling));
 
